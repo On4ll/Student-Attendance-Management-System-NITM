@@ -1,5 +1,4 @@
 #Created Github Repository on 5-15-2023
-#Wanted to put all the classes in different files to make code look clear, but not time to do experiments ! >_<
 
 from tkinter import *  #For designing GUI
 from tkcalendar import Calendar #For taking date input from a calendar
@@ -18,11 +17,12 @@ centralDb = mysql.connector.connect(
 dbCursor = centralDb.cursor() #dbCursor will be our agent to execute all the sql commands here
 
 background_login= 'tomato'
-background_student = 'lime'
+background_student = 'lightgreen'
 background_faculty = 'cyan'
-background_admin = 'green'
+background_admin = 'lightblue'
 HEIGHT = 700
 WIDTH = 900
+SHOWAXIS = True
 
 loginDic = {    #I'm using this to make the code easier to understand
     'id' : 0,
@@ -34,8 +34,6 @@ loginDic = {    #I'm using this to make the code easier to understand
 root = Tk()
 root.title("Student Attendance Management")
 root.geometry(f"{WIDTH}x{HEIGHT}+300+50") #The '+300+50' is used to modify the position of the main window when the program starts
-
-showAxis = True
 
 class User:
     id = 'null'
@@ -56,6 +54,7 @@ class Attendance:
     fid = 'null'
     att = 0
     date = 'dd-mm-yyyy'
+    attendanceMultiplier = 1
 
 def DoesUserExist(inputLoginId):
     query = "select exists(select Password from Credentials where Id = %s)" #Query to check if given use id exists
@@ -70,7 +69,6 @@ def DoesUserExist(inputLoginId):
     else:
         return 0
     
-
 
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Loging Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 def printStuff(inputLoginId, inputLoginPassword):
@@ -152,11 +150,11 @@ class StudentFrame:
         self.frameStudent = Frame(root, bg = background_student, height = HEIGHT, width = WIDTH)
         self.frameStudent.place(relx = 0, rely = 0)
 
-        self.buttonGenReport = Button(self.frameStudent, text = 'Generate Report')
-        self.buttonGenReport.place(relx = 0.45, rely = 0.45)
+        self.buttonGenReport = Button(self.frameStudent, text = 'Generate Report', width = 20)
+        self.buttonGenReport.place(relx = 0.42, rely = 0.45)
 
-        self.buttonLeaveApp = Button(self.frameStudent, text = 'Leave Application')
-        self.buttonLeaveApp.place(relx = 0.445, rely = 0.50)
+        self.buttonLeaveApp = Button(self.frameStudent, text = 'Leave Application', width = 20)
+        self.buttonLeaveApp.place(relx = 0.42, rely = 0.50)
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Student Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
 
@@ -171,10 +169,10 @@ class FacultyFrame:
         self.frameFaculty = Frame(root, bg = background_faculty, height = HEIGHT, width = WIDTH)
         self.frameFaculty.place(relx = 0, rely = 0)
 
-        self.buttonGenReport = Button(self.frameFaculty, text = 'Generate Report')
+        self.buttonGenReport = Button(self.frameFaculty, text = 'Generate Report', width = 20)
         self.buttonGenReport.place(relx = 0.45, rely = 0.45)
 
-        self.attendance = Button(self.frameFaculty, text = 'Take Attendance', command = lambda: self.ChangeToAttendanceFrame(self.frameFaculty))
+        self.attendance = Button(self.frameFaculty, width = 20, text = 'Take Attendance', command = lambda: self.ChangeToAttendanceFrame(self.frameFaculty))
         self.attendance.place(relx = 0.448, rely = 0.50)
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Faculty Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
@@ -190,17 +188,17 @@ class AdminFrame:
         self.frameAdmin = Frame(root, bg = background_admin, height = HEIGHT, width = WIDTH)
         self.frameAdmin.place(relx = 0, rely = 0)
 
-        self.buttonGenReport = Button(self.frameAdmin, text = 'Generate Report')
-        self.buttonGenReport.place(relx = 0.45, rely = 0.45)
+        self.buttonGenReport = Button(self.frameAdmin, text = 'Generate Report', width = 30)
+        self.buttonGenReport.place(relx = 0.40, rely = 0.45)
 
-        self.addMembers = Button(self.frameAdmin, text = 'Add/Remove/Modify Members', command = lambda: self.ChangeToARMFrame(self.frameAdmin))
+        self.addMembers = Button(self.frameAdmin, width = 30, text = 'Add/Remove/Modify Members', command = lambda: self.ChangeToARMFrame(self.frameAdmin))
         self.addMembers.place(relx = 0.40, rely = 0.50)
 
         #self.modifyMembers = Button(self.frameAdmin, text = 'Modify Members')
         #self.modifyMembers.place(relx = 0.445, rely = 0.55)
 
-        self.backup = Button(self.frameAdmin, text = 'Backup Database')
-        self.backup.place(relx = 0.445, rely = 0.55)
+        self.backup = Button(self.frameAdmin, text = 'Backup Database', width = 30)
+        self.backup.place(relx = 0.40, rely = 0.55)
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Admin Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
 
@@ -249,8 +247,6 @@ class ARMFrame:
     
     def SearchId(self):
         qid = self.entryARMSearch.get()
-        print("___________________")
-        print(type(qid))
 
         if DoesUserExist(qid) == 1:
             query = "SELECT * FROM Credentials WHERE Id = %s" #Get all the information about the user id from Credentials table
@@ -330,7 +326,6 @@ class ARMFrame:
 
         if sr1.type == 'student':
             dbCursor.execute(query2, val)
-            print("Hello")
         dbCursor.execute(query1, val)
         self.ClearSearch()
         self.ClearSearchResult()
@@ -340,77 +335,79 @@ class ARMFrame:
         centralDb.commit()
     
     def Create(self):
+        offset = 0.25
+
         self.frameARM = Frame(root, bg = background_admin, height = HEIGHT, width = WIDTH)
         self.frameARM.place(relx = 0, rely = 0)
 
         self.labelARMSearch = Label(self.frameARM, text='Search', bg = background_admin)
-        self.labelARMSearch.place(relx = 0.05, rely = 0.2)
+        self.labelARMSearch.place(relx = 0.05+offset, rely = 0.2)
         self.entryARMSearch = Entry(self.frameARM, width = 20)
-        self.entryARMSearch.place(relx = 0.12, rely = 0.2)
-        self.buttonARMSearch = Button(self.frameARM, text = 'Go', command = self.SearchId)
-        self.buttonARMSearch.place(relx = 0.27, rely = 0.195)
+        self.entryARMSearch.place(relx = 0.12+offset, rely = 0.2)
+        self.buttonARMSearch = Button(self.frameARM, text = 'Go', command = self.SearchId, width = 10)
+        self.buttonARMSearch.place(relx = 0.27+offset, rely = 0.195)
 
         self.labelARMId = Label(self.frameARM, text='Id', bg = background_admin)
-        self.labelARMId.place(relx = 0.08, rely = 0.3)
+        self.labelARMId.place(relx = 0.08+offset, rely = 0.3)
         self.entryARMId = Entry(self.frameARM, width = 25)
-        self.entryARMId.place(relx = 0.1, rely = 0.3)
+        self.entryARMId.place(relx = 0.1+offset, rely = 0.3)
 
         self.labelARMPassword = Label(self.frameARM, text='Password', bg = background_admin)
-        self.labelARMPassword.place(relx = 0.035, rely = 0.35)
+        self.labelARMPassword.place(relx = 0.035+offset, rely = 0.35)
         self.entryARMPassword = Entry(self.frameARM, width = 25)
-        self.entryARMPassword.place(relx = 0.1, rely = 0.35)
+        self.entryARMPassword.place(relx = 0.1+offset, rely = 0.35)
 
         self.labelARMName = Label(self.frameARM, text='Name', bg = background_admin)
-        self.labelARMName.place(relx = 0.055, rely = 0.4)
+        self.labelARMName.place(relx = 0.055+offset, rely = 0.4)
         self.entryARMName = Entry(self.frameARM, width = 25)
-        self.entryARMName.place(relx = 0.1, rely = 0.4)
+        self.entryARMName.place(relx = 0.1+offset, rely = 0.4)
 
         self.labelARType = Label(self.frameARM, text='User Type', bg = background_admin)
-        self.labelARType.place(relx = 0.035, rely = 0.45)
+        self.labelARType.place(relx = 0.035+offset, rely = 0.45)
         self.entryARMType = Entry(self.frameARM, width = 25)
-        self.entryARMType.place(relx = 0.1, rely = 0.45)
+        self.entryARMType.place(relx = 0.1+offset, rely = 0.45)
 
         self.labelARCourse = Label(self.frameARM, text='Courses', bg = background_admin)
-        self.labelARCourse.place(relx = 0.01, rely = 0.5)
+        self.labelARCourse.place(relx = 0.01+offset, rely = 0.5)
         self.entryARMCourse = Listbox(self.frameARM, width = 28, height = 9)
-        self.entryARMCourse.place(relx = 0.07, rely = 0.5)
+        self.entryARMCourse.place(relx = 0.07+offset, rely = 0.5)
 
         self.buttonARMUpdate = Button(self.frameARM, text = 'Update Data')
-        self.buttonARMUpdate.place(relx = 0.3, rely = 0.32, width = 100)
+        self.buttonARMUpdate.place(relx = 0.3+offset, rely = 0.32, width = 100)
 
         self.buttonARMAdd = Button(self.frameARM, text = 'Add Id', command = self.AddId)
-        self.buttonARMAdd.place(relx = 0.3, rely = 0.37, width = 100)
+        self.buttonARMAdd.place(relx = 0.3+offset, rely = 0.37, width = 100)
 
         self.buttonARMRemove = Button(self.frameARM, text = 'Remove Id', command = self.RemoveID)
-        self.buttonARMRemove.place(relx = 0.3, rely = 0.42, width = 100)
+        self.buttonARMRemove.place(relx = 0.3+offset, rely = 0.42, width = 100)
 
         self.buttonARMApplyChanges = Button(self.frameARM, text = 'Apply Changes', width = 25, command = self.ARMCommitChange)
-        self.buttonARMApplyChanges.place(relx = 0.4, rely = 0.9)
+        self.buttonARMApplyChanges.place(relx = 0.2+offset, rely = 0.9)
 
-        self.buttonARMBack = Button(self.frameARM, text = 'Back', command = lambda: self.ChangeToAdminFrame(self.frameARM))
+        self.buttonARMBack = Button(self.frameARM, text = 'Back', command = lambda: self.ChangeToAdminFrame(self.frameARM), width = 10)
         self.buttonARMBack.place(relx = 0.01, rely = 0.01)
 
-        self.buttonARMRemoveCourse = Button(self.frameARM, text = 'Remove', command = self.RemoveCourse)
-        self.buttonARMRemoveCourse.place(relx = 0.175, rely = 0.75)
+        self.buttonARMRemoveCourse = Button(self.frameARM, text = 'Remove', command = self.RemoveCourse, width = 10)
+        self.buttonARMRemoveCourse.place(relx = 0.13+offset, rely = 0.73)
 
         self.listboxARMCourseList = Listbox(self.frameARM, width = 30, height = 9)
-        self.listboxARMCourseList.place(relx = 0.28, rely = 0.5)
+        self.listboxARMCourseList.place(relx = 0.28+offset, rely = 0.5)
 
-        self.buttonARMAddCourse = Button(self.frameARM, text = 'Add', command = self.AddCourse)
-        self.buttonARMAddCourse.place(relx = 0.35, rely = 0.75)
+        self.buttonARMAddCourse = Button(self.frameARM, text = 'Add', command = self.AddCourse, width = 10)
+        self.buttonARMAddCourse.place(relx = 0.33+offset, rely = 0.73)
 
-        self.labelARMMessage = Label(self.frameARM, text = '', bg = background_login)
-        self.labelARMMessage.place(relx = 0.01, rely = 0.95)
+        self.labelARMMessage = Label(self.frameARM, text = '', bg = background_admin)
+        self.labelARMMessage.place(relx = 0.22+offset, rely = 0.25)
 
         self.labelARMCourseId = Label(self.frameARM, text='Course Id', bg = background_admin)
-        self.labelARMCourseId.place(relx = 0.6, rely = 0.4)
+        #self.labelARMCourseId.place(relx = 0.6, rely = 0.4)
         self.entryARMCourseId = Entry(self.frameARM, width = 25)
-        self.entryARMCourseId.place(relx = 0.7, rely = 0.4)
+        #self.entryARMCourseId.place(relx = 0.7, rely = 0.4)
 
         self.labelARMCourseName = Label(self.frameARM, text='Course Name', bg = background_admin)
-        self.labelARMCourseName.place(relx = 0.6, rely = 0.5)
+        #self.labelARMCourseName.place(relx = 0.6, rely = 0.5)
         self.entryARCourseMName = Entry(self.frameARM, width = 25)
-        self.entryARCourseMName.place(relx = 0.7, rely = 0.5)
+        #self.entryARCourseMName.place(relx = 0.7, rely = 0.5)
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Add/Remove/Modyfy User Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
 
@@ -458,27 +455,45 @@ class AttendanceFrame:
             sr1.course = "[" + temp2[x] + "]" + " " + temp2[x+1]
             self.listboxListStudents.insert(END, sr1.course)
 
+    def MarkAttendance(self):
+        presentList = self.listboxListStudents.curselection()
+        print(presentList)
+        studentCount = self.listboxListStudents.size()
+
+        for a in range(studentCount):
+            if a in presentList:
+                print("Present")
+                temp1 = self.listboxListStudents.get(a)
+                att1.sid = temp1[temp1.find("[")+1:temp1.find("]")]
+                query = "insert into Attendance(ADate, Sid, Fid, Cid, Att1) values(%s, %s, %s, %s, %s)"
+                val = (att1.date, att1.sid, att1.fid, att1.cid, att1.attendanceMultiplier)
+                dbCursor.execute(query, val)
+                centralDb.commit()
+
     def Create(self):
         #att1.fid = user1.id
         att1.fid = 'F3'
 
-        self.frameAttendance = Frame(root, bg = background_login, height = HEIGHT, width = WIDTH)
+        self.frameAttendance = Frame(root, bg = 'orange', height = HEIGHT, width = WIDTH)
         self.frameAttendance.place(relx = 0, rely = 0)
 
         self.buttonSelectDate = Button(self.frameAttendance, text = 'Select Date', command = self.ShowCalendar)
-        self.buttonSelectDate.place(relx = 0.46, rely = 0.3)
+        self.buttonSelectDate.place(relx = 0.465, rely = 0.31)
 
         self.labelShowDate = Label(self.frameAttendance, text='dd-mm-yyyy', bg = 'white', width='15')
-        self.labelShowDate.place(relx = 0.43, rely = 0.36)
+        self.labelShowDate.place(relx = 0.44, rely = 0.36)
 
-        self.labelSelecCourse = Label(self.frameAttendance, text='Select Course', bg = background_admin)
-        self.labelSelecCourse.place(relx = 0.45, rely = 0.1)
+        self.labelSelecCourse = Label(self.frameAttendance, text='Select Course', bg = 'white')
+        self.labelSelecCourse.place(relx = 0.46, rely = 0.1)
 
         self.listboxSelectCourse = Listbox(self.frameAttendance, width = 30, height = 5)
         self.listboxSelectCourse.place(relx = 0.4, rely = 0.15)
 
-        self.buttonSelectDate = Button(self.frameAttendance, text = 'Take Attendance', command = self.TakeAttendance)
-        self.buttonSelectDate.place(relx = 0.46, rely = 0.45)
+        self.buttonSelectDate = Button(self.frameAttendance, text = 'Take Attendance', command = self.TakeAttendance, width = 30)
+        self.buttonSelectDate.place(relx = 0.38, rely = 0.42)
+
+        self.buttonSubmit = Button(self.frameAttendance, text = 'Submit', command = self.MarkAttendance, width = 20)
+        self.buttonSubmit.place(relx = 0.42, rely = 0.92)
 
         self.listboxListStudents = Listbox(self.frameAttendance, width = 30, height = 15, selectmode=MULTIPLE)
         self.listboxListStudents.place(relx = 0.4, rely = 0.55)
@@ -508,6 +523,7 @@ sr1 = SearchResult()
 
 global att1
 att1 = Attendance()
+
 logingFrame = LoginFrame()
 logingFrame.Create()
 
@@ -523,8 +539,11 @@ logingFrame.Create()
 #facultyFrame = FacultyFrame()
 #facultyFrame.Create()
 
+#studentFrame = StudentFrame()
+#studentFrame.Create()
+
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Drawing X and Y axis for ease of placeing widgets ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
-if showAxis == False:
+if SHOWAXIS == True:
     yFrame = Frame(root, height = HEIGHT, width = 1, bg = 'white')
     yFrame.place(relx = 0.5, rely = 0)
     xFrame = Frame(root, height = 1, width = WIDTH, bg = 'white')
