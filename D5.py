@@ -1,5 +1,5 @@
 #Created Github Repository on 5-15-2023
-#Testing
+#Wanted to put all the classes in different files to make code look clear, but not time to do experiments ! >_<
 
 from tkinter import *  #For designing GUI
 from tkcalendar import Calendar #For taking date input from a calendar
