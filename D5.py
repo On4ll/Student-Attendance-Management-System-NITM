@@ -493,7 +493,6 @@ class AttendanceFrame:
             sr1.course = "[" + temp2[x] + "]" + " " + temp2[x+1]
             self.listboxSelectCourse.insert(END, sr1.course)
 
-        
         #att1.cid = self.listboxSelectCourse.get()
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Attendance Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
