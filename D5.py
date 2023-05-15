@@ -495,9 +495,6 @@ class AttendanceFrame:
 
         
         #att1.cid = self.listboxSelectCourse.get()
-        
-
-
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Attendance Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
 
