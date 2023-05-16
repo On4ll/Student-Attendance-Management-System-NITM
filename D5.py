@@ -22,7 +22,7 @@ background_faculty = 'cyan'
 background_admin = 'lightblue'
 HEIGHT = 700
 WIDTH = 900
-SHOWAXIS = True
+SHOWAXIS = FALSE
 
 loginDic = {    #I'm using this to make the code easier to understand
     'id' : 0,
@@ -114,13 +114,13 @@ class LoginFrame:
                 else:
                     exit()
             else:
-                print("Wrong2")
+                #print("Wrong2")
                 self.labelWrongPassword.place(relx = 0.37, rely = 0.61) #Shows the message that wrong password
         else:
-            print("Wrong1")
+            #print("Wrong1")
             self.labelWrongUser.place(relx = 0.46, rely = 0.61) # Shows the message that user does not exist
                 
-        printStuff(inputLoginId, inputLoginPassword)
+        #printStuff(inputLoginId, inputLoginPassword)
     
     def Create(self): #Creates and places all the widgets of this frame. Didn't use constructor because then I would have to delete the object and create it again to place this widgets again.Insted I will just delete the widgetand create them again using this function. Kind of same thing I guess.
         self.frameLogin = Frame(root, bg = background_login, height = HEIGHT, width = WIDTH)
@@ -185,9 +185,6 @@ class FacultyFrame:
 
         self.attendance = Button(self.frameFaculty, width = 20, text = 'Take Attendance', command = lambda: self.ChangeToAttendanceFrame(self.frameFaculty))
         self.attendance.place(relx = 0.448, rely = 0.50)
-
-        self.buttonARMBack = Button(self.frameFaculty, text = 'Back', width = 10)
-        self.buttonARMBack.place(relx = 0.01, rely = 0.01)
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Faculty Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
 
@@ -241,7 +238,7 @@ class ARMFrame:
             for x in range(0, len(temp2), 2):
                 sr1.course = "[" + temp2[x] + "]" + " " + temp2[x+1]
                 self.entryARMCourse.insert(END, sr1.course)
-            print(sr1.course)
+            #print(sr1.course)
 
     def ShowCourses(self):
             self.listboxARMCourseList.delete(0, END)  #Emptying the current listing in the listbox
@@ -250,7 +247,7 @@ class ARMFrame:
             dbCursor.execute(query, val)
             temp2 = []
             for y in dbCursor:
-                print(y)
+                #print(y)
                 temp2.append(y[0])
                 temp2.append(y[1])
             for x in range(0, len(temp2), 2):
@@ -443,7 +440,7 @@ class AttendanceFrame:
     def ShowCalendar(self):
         def InsertDate(self):
             att1.date = self.cal.get_date()
-            print(att1.date)
+            #print(att1.date)
             self.labelShowDate.config(text = att1.date)
             self.topLevelCalendarWindow.destroy()
 
@@ -467,27 +464,42 @@ class AttendanceFrame:
         dbCursor.execute(query, val)
         temp2 = []
         for y in dbCursor:
-            print(y)
+            #print(y)
             temp2.append(y[0])
             temp2.append(y[1])
         for x in range(0, len(temp2), 2):
             sr1.course = "[" + temp2[x] + "]" + " " + temp2[x+1]
             self.listboxListStudents.insert(END, sr1.course)
 
+    def DoubleTrouble(self):
+        if self.doubleAttendance.get():
+            att1.attendanceMultiplier = 2
+        else:
+            att1.attendanceMultiplier = 1
+    
     def MarkAttendance(self):
         presentList = self.listboxListStudents.curselection()
-        print(presentList)
+        #print(presentList)
         studentCount = self.listboxListStudents.size()
 
-        for a in range(studentCount):
-            if a in presentList:
-                print("Present")
-                temp1 = self.listboxListStudents.get(a)
-                att1.sid = temp1[temp1.find("[")+1:temp1.find("]")]
-                query = "insert into Attendance(ADate, Sid, Fid, Cid, Att1) values(%s, %s, %s, %s, %s)"
-                val = (att1.date, att1.sid, att1.fid, att1.cid, att1.attendanceMultiplier)
-                dbCursor.execute(query, val)
-                centralDb.commit()
+        for x in range(att1.attendanceMultiplier):
+            for a in range(studentCount):
+                if a in presentList:
+                    temp1 = self.listboxListStudents.get(a)
+                    att1.sid = temp1[temp1.find("[")+1:temp1.find("]")]
+                    query = "insert into Attendance(ADate, Sid, Fid, Cid, Att1) values(%s, %s, %s, %s, %s)"
+                    val = (att1.date, att1.sid, att1.fid, att1.cid, 1)
+                    dbCursor.execute(query, val)
+                    centralDb.commit()
+                else:
+                    temp1 = self.listboxListStudents.get(a)
+                    att1.sid = temp1[temp1.find("[")+1:temp1.find("]")]
+                    query = "insert into Attendance(ADate, Sid, Fid, Cid, Att1) values(%s, %s, %s, %s, %s)"
+                    val = (att1.date, att1.sid, att1.fid, att1.cid, 0)
+                    dbCursor.execute(query, val)
+                    centralDb.commit()
+            self.labelAttendanceMessage.config(text = "Attendance Marked")
+            self.labelAttendanceMessage.after(2000, lambda: self.labelAttendanceMessage.config(text=''))
 
     def Create(self):
         #att1.fid = user1.id
@@ -509,10 +521,10 @@ class AttendanceFrame:
         self.listboxSelectCourse.place(relx = 0.4, rely = 0.15)
 
         self.buttonSelectDate = Button(self.frameAttendance, text = 'Take Attendance', command = self.TakeAttendance, width = 30)
-        self.buttonSelectDate.place(relx = 0.38, rely = 0.42)
+        self.buttonSelectDate.place(relx = 0.38, rely = 0.47)
 
         self.buttonSubmit = Button(self.frameAttendance, text = 'Submit', command = self.MarkAttendance, width = 20)
-        self.buttonSubmit.place(relx = 0.42, rely = 0.92)
+        self.buttonSubmit.place(relx = 0.42, rely = 0.91)
 
         self.listboxListStudents = Listbox(self.frameAttendance, width = 30, height = 15, selectmode=MULTIPLE)
         self.listboxListStudents.place(relx = 0.4, rely = 0.55)
@@ -520,13 +532,20 @@ class AttendanceFrame:
         self.buttonARMBack = Button(self.frameAttendance, text = 'Back', command = lambda: self.ChangeToFacultyFrame(self.frameAttendance), width = 10)
         self.buttonARMBack.place(relx = 0.01, rely = 0.01)
 
+        self.doubleAttendance = IntVar()
+        self.checkboxDoubleAttendance = Checkbutton(self.frameAttendance, text = 'Double Attendance', variable=self.doubleAttendance, command = self.DoubleTrouble)
+        self.checkboxDoubleAttendance.place(relx = 0.44, rely = 0.42)
+
+        self.labelAttendanceMessage = Label(self.frameAttendance, text = '', bg = 'orange')
+        self.labelAttendanceMessage.place(relx = 0.445, rely = 0.95)
+
         self.listboxSelectCourse.delete(0, END)  #Emptying the current listing in the listbox
         query = "select Cid, Cname from CourseAlloc where Fac1 = %s or Fac2 = %s or Fac3 = %s"
         val = (att1.fid, att1.fid, att1.fid, )
         dbCursor.execute(query, val)
         temp2 = []
         for y in dbCursor:
-            print(y)
+            #print(y)
             temp2.append(y[0])
             temp2.append(y[1])
         for x in range(0, len(temp2), 2):
@@ -541,6 +560,11 @@ class AttendanceFrame:
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Generate Report Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
 class GenerateReportFrame:
+    def ChangeToFacultyFrame(self, sourceFrame):
+        sourceFrame.destroy()
+        facultyFrame = FacultyFrame()
+        facultyFrame.Create()
+    
     def ShowReport(self):
         sid = self.entryGenReportRoll.get()
         cid = self.entryGenReportCourse.get()
@@ -549,13 +573,25 @@ class GenerateReportFrame:
         val = (cid, sid, )
         dbCursor.execute(query, val)
         temp2 = []
+        totalClasses = 0
+        totalPresent = 0
         for y in dbCursor:
-            print(y)
+            #print(y)
             temp2.append(y[0])
             temp2.append(y[1])
         for x in range(0, len(temp2), 2):
-            sr1.course = "[" + temp2[x] + "]" + " " + temp2[x+1]
+            if temp2[x+1] == 1:
+                temp3 = '  present'
+                totalClasses += 1
+                totalPresent += 1
+            else:
+                temp3 = '  absent'
+                totalClasses += 1
+            sr1.course = "[" + temp2[x] + "]" + " " + temp3
             self.listboxListAttendance.insert(END, sr1.course)
+        percentageAttendance = (totalPresent / totalClasses) * 100
+        percentageAttendance = round(percentageAttendance, 2)
+        self.labelAttendancePercentage.config(text='Attendance: ' + str(percentageAttendance) + "%")
     
     def Create(self):
         self.frameGenReport = Frame(root, bg = background_admin, height = HEIGHT, width = WIDTH)
@@ -576,6 +612,12 @@ class GenerateReportFrame:
 
         self.listboxListAttendance = Listbox(self.frameGenReport, width = 30, height = 20)
         self.listboxListAttendance.place(relx = 0.435, rely = 0.40)
+
+        self.buttonARMBack = Button(self.frameGenReport, text = 'Back', width = 10, command = lambda: self.ChangeToFacultyFrame(self.frameGenReport))
+        self.buttonARMBack.place(relx = 0.01, rely = 0.01)
+
+        self.labelAttendancePercentage = Label(self.frameGenReport, text='Attendance: ' + str(0) + "%", bg = background_admin)
+        self.labelAttendancePercentage.place(relx = 0.47, rely = 0.36)
 
 
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Generate Report Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
