@@ -146,11 +146,16 @@ class LoginFrame:
 
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Student Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 class StudentFrame:
+    def ChangeToGenerateReportFrame(self, sourceFrame):
+        sourceFrame.destroy()
+        generateReportFrame = GenerateReportFrame()
+        generateReportFrame.Create()
+    
     def Create(self):
         self.frameStudent = Frame(root, bg = background_student, height = HEIGHT, width = WIDTH)
         self.frameStudent.place(relx = 0, rely = 0)
 
-        self.buttonGenReport = Button(self.frameStudent, text = 'Generate Report', width = 20)
+        self.buttonGenReport = Button(self.frameStudent, text = 'Generate Report', width = 20, command = lambda: self.ChangeToGenerateReportFrame(self.frameStudent))
         self.buttonGenReport.place(relx = 0.42, rely = 0.45)
 
         self.buttonLeaveApp = Button(self.frameStudent, text = 'Leave Application', width = 20)
@@ -165,15 +170,24 @@ class FacultyFrame:
         attendanceFrame = AttendanceFrame()
         attendanceFrame.Create()
 
+    
+    def ChangeToGenerateReportFrame(self, sourceFrame):
+        sourceFrame.destroy()
+        generateReportFrame = GenerateReportFrame()
+        generateReportFrame.Create()
+
     def Create(self):
         self.frameFaculty = Frame(root, bg = background_faculty, height = HEIGHT, width = WIDTH)
         self.frameFaculty.place(relx = 0, rely = 0)
 
-        self.buttonGenReport = Button(self.frameFaculty, text = 'Generate Report', width = 20)
+        self.buttonGenReport = Button(self.frameFaculty, text = 'Generate Report', width = 20, command = lambda: self.ChangeToGenerateReportFrame(self.frameFaculty))
         self.buttonGenReport.place(relx = 0.45, rely = 0.45)
 
         self.attendance = Button(self.frameFaculty, width = 20, text = 'Take Attendance', command = lambda: self.ChangeToAttendanceFrame(self.frameFaculty))
         self.attendance.place(relx = 0.448, rely = 0.50)
+
+        self.buttonARMBack = Button(self.frameFaculty, text = 'Back', width = 10)
+        self.buttonARMBack.place(relx = 0.01, rely = 0.01)
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Faculty Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
 
@@ -183,12 +197,17 @@ class AdminFrame:
         sourceFrame.destroy()
         armFrame = ARMFrame()
         armFrame.Create()
+
+    def ChangeToGenerateReportFrame(self, sourceFrame):
+        sourceFrame.destroy()
+        generateReportFrame = GenerateReportFrame()
+        generateReportFrame.Create()
     
     def Create(self):
         self.frameAdmin = Frame(root, bg = background_admin, height = HEIGHT, width = WIDTH)
         self.frameAdmin.place(relx = 0, rely = 0)
 
-        self.buttonGenReport = Button(self.frameAdmin, text = 'Generate Report', width = 30)
+        self.buttonGenReport = Button(self.frameAdmin, text = 'Generate Report', width = 30, command = lambda: self.ChangeToGenerateReportFrame(self.frameAdmin))
         self.buttonGenReport.place(relx = 0.40, rely = 0.45)
 
         self.addMembers = Button(self.frameAdmin, width = 30, text = 'Add/Remove/Modify Members', command = lambda: self.ChangeToARMFrame(self.frameAdmin))
@@ -416,10 +435,10 @@ class ARMFrame:
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Attendance Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
 class AttendanceFrame:
-    def ChangeToAttendanceFrame(self, sourceFrame):
+    def ChangeToFacultyFrame(self, sourceFrame):
         sourceFrame.destroy()
-        attendanceFrame = ARMFrame()
-        attendanceFrame.Create()
+        facultyFrame = FacultyFrame()
+        facultyFrame.Create()
 
     def ShowCalendar(self):
         def InsertDate(self):
@@ -472,7 +491,7 @@ class AttendanceFrame:
 
     def Create(self):
         #att1.fid = user1.id
-        att1.fid = 'F3'
+        att1.fid = user1.id
 
         self.frameAttendance = Frame(root, bg = 'orange', height = HEIGHT, width = WIDTH)
         self.frameAttendance.place(relx = 0, rely = 0)
@@ -498,6 +517,9 @@ class AttendanceFrame:
         self.listboxListStudents = Listbox(self.frameAttendance, width = 30, height = 15, selectmode=MULTIPLE)
         self.listboxListStudents.place(relx = 0.4, rely = 0.55)
 
+        self.buttonARMBack = Button(self.frameAttendance, text = 'Back', command = lambda: self.ChangeToFacultyFrame(self.frameAttendance), width = 10)
+        self.buttonARMBack.place(relx = 0.01, rely = 0.01)
+
         self.listboxSelectCourse.delete(0, END)  #Emptying the current listing in the listbox
         query = "select Cid, Cname from CourseAlloc where Fac1 = %s or Fac2 = %s or Fac3 = %s"
         val = (att1.fid, att1.fid, att1.fid, )
@@ -513,6 +535,50 @@ class AttendanceFrame:
 
         #att1.cid = self.listboxSelectCourse.get()
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Attendance Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
+
+
+
+# ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Generate Report Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
+
+class GenerateReportFrame:
+    def ShowReport(self):
+        sid = self.entryGenReportRoll.get()
+        cid = self.entryGenReportCourse.get()
+        self.listboxListAttendance.delete(0, END)  #Emptying the current listing in the listbox
+        query = "select ADate, Att1 from Attendance where Cid = %s and Sid = %s"
+        val = (cid, sid, )
+        dbCursor.execute(query, val)
+        temp2 = []
+        for y in dbCursor:
+            print(y)
+            temp2.append(y[0])
+            temp2.append(y[1])
+        for x in range(0, len(temp2), 2):
+            sr1.course = "[" + temp2[x] + "]" + " " + temp2[x+1]
+            self.listboxListAttendance.insert(END, sr1.course)
+    
+    def Create(self):
+        self.frameGenReport = Frame(root, bg = background_admin, height = HEIGHT, width = WIDTH)
+        self.frameGenReport.place(relx = 0, rely = 0)
+
+        self.labelGenReportCourse = Label(self.frameGenReport, text='Course', bg = background_admin)
+        self.labelGenReportCourse.place(relx = 0.4, rely = 0.1)
+        self.entryGenReportCourse = Entry(self.frameGenReport, width = 20)
+        self.entryGenReportCourse.place(relx = 0.47, rely = 0.1)
+
+        self.labelGenReportRoll = Label(self.frameGenReport, text='Roll', bg = background_admin)
+        self.labelGenReportRoll.place(relx = 0.4, rely = 0.15)
+        self.entryGenReportRoll = Entry(self.frameGenReport, width = 20)
+        self.entryGenReportRoll.place(relx = 0.47, rely = 0.15)
+
+        self.buttonGenReport = Button(self.frameGenReport, text = 'Generate', width = 20, command = self.ShowReport)
+        self.buttonGenReport.place(relx = 0.45, rely = 0.2)
+
+        self.listboxListAttendance = Listbox(self.frameGenReport, width = 30, height = 20)
+        self.listboxListAttendance.place(relx = 0.435, rely = 0.40)
+
+
+# ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Generate Report Frame ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 
 
 global user1
@@ -541,6 +607,9 @@ logingFrame.Create()
 
 #studentFrame = StudentFrame()
 #studentFrame.Create()
+
+#generateReportFrame = GenerateReportFrame()
+#generateReportFrame.Create()
 
 # ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ Drawing X and Y axis for ease of placeing widgets ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄ #
 if SHOWAXIS == True:
